@@ -1,0 +1,59 @@
+version: '3'
+
+volumes:
+        - jenkins_storage_new
+        - apache_storage_new
+
+networks:
+        frontend:
+                name: projectnet
+                driver: bridge
+        backend:
+                name: projectnet
+                driver: bridge
+
+services:
+        jenkinsos:
+                image:  jenkins
+                volumes:
+                        - jenkins_storage_new:/var/jenkins_home
+                        - /var/lib/docker/volumes/apache_storage_new/_data:/apache_dvd
+                restart: always
+                ports:
+                        - 8080:8080
+                        - 5000:5000
+                depends_on:
+                        - apacheos1
+                        - apacheos2
+                networks:
+                        - projectnet
+
+        apacheos1:
+                image:  myimage:v1
+                volumes:
+                        - apache_storage_new:/var/www/html/
+                restart: always
+                ports:
+                        - 80:80
+                depends_on:
+                        - jenkinsos
+                        - apacheos2
+                networks:
+                        projectnet:
+                                aliases:
+                                        ayush
+
+        apacheos2:
+                image:  myimage:v1
+                volumes:
+                        - apache_storage_new:/var/www/html/
+                restart: always
+                ports:
+                        - 80:80
+                depends_on:
+                        - jenkinsos
+                        - apacheos1
+                networks:
+                        projectnet:
+                                aliases:
+                                        ayush
